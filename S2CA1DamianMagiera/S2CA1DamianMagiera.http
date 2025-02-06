@@ -1,0 +1,6 @@
+@S2CA1DamianMagiera_HostAddress = http://localhost:5285
+
+GET {{S2CA1DamianMagiera_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
