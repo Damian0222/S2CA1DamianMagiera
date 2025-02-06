@@ -10,25 +10,23 @@ using S2CA1DamianMagiera.Models;
 
 namespace S2CA1DamianMagiera.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthorsController : ControllerBase
+    public class Authors1Controller : ControllerBase
     {
         private readonly BookContext _context;
 
-        public AuthorsController(BookContext context)
+        public Authors1Controller(BookContext context)
         {
             _context = context;
         }
-
-        // GET: api/Authors
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Author>>> GetAuthors()
         {
             return await _context.Authors.ToListAsync();
         }
 
-        // GET: api/Authors/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Author>> GetAuthor(int id)
         {
@@ -42,8 +40,6 @@ namespace S2CA1DamianMagiera.Controllers
             return author;
         }
 
-        // PUT: api/Authors/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAuthor(int id, Author author)
         {
@@ -72,9 +68,6 @@ namespace S2CA1DamianMagiera.Controllers
 
             return NoContent();
         }
-
-        // POST: api/Authors
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Author>> PostAuthor(Author author)
         {
@@ -84,7 +77,6 @@ namespace S2CA1DamianMagiera.Controllers
             return CreatedAtAction("GetAuthor", new { id = author.Id }, author);
         }
 
-        // DELETE: api/Authors/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
