@@ -6,29 +6,39 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using S2CA1DamianMagiera.Data;
+using S2CA1DamianMagiera.DTO;
 using S2CA1DamianMagiera.Models;
 
 namespace S2CA1DamianMagiera.Controllers
 {
 
-    [Route("api/[controller]")]
+
+
+    [Route("api/authors")]
     [ApiController]
-    public class Authors1Controller : ControllerBase
+    public class AuthorsController : ControllerBase
     {
         private readonly BookContext _context;
 
-        public Authors1Controller(BookContext context)
+        public AuthorsController(BookContext context)
         {
             _context = context;
         }
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Author>>> GetAuthors()
+        public async Task<ActionResult<IEnumerable<AuthorDTO>>> GetAuthors()
         {
-            return await _context.Authors.ToListAsync();
+            var authors = await _context.Authors.ToListAsync();
+            return authors.Select(a => new AuthorDTO
+            {
+
+                Name = a.Name,
+                Bio = a.Bio
+            }).ToList();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Author>> GetAuthor(int id)
+        public async Task<ActionResult<AuthorDTO>> GetAuthor(int id)
         {
             var author = await _context.Authors.FindAsync(id);
 
@@ -37,16 +47,19 @@ namespace S2CA1DamianMagiera.Controllers
                 return NotFound();
             }
 
-            return author;
+            return new AuthorDTO { Name = author.Name, Bio = author.Bio };
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAuthor(int id, Author author)
+        public async Task<IActionResult> UpdateAuthor(int id, AuthorDTO authorDTO)
         {
-            if (id != author.Id)
+            var author = await _context.Authors.FindAsync(id);
+            if (author == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+
+            author.Name = authorDTO.Name;
 
             _context.Entry(author).State = EntityState.Modified;
 
@@ -69,13 +82,25 @@ namespace S2CA1DamianMagiera.Controllers
             return NoContent();
         }
         [HttpPost]
-        public async Task<ActionResult<Author>> PostAuthor(Author author)
+        public async Task<ActionResult<AuthorDTO>> CreateAuthor(AuthorDTO authorDTO)
         {
+            var author = new Author
+            {
+                Name = authorDTO.Name,
+                Bio = authorDTO.Bio
+
+            };
+
             _context.Authors.Add(author);
             await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, new AuthorDTO
+            {
 
-            return CreatedAtAction("GetAuthor", new { id = author.Id }, author);
+                Name = author.Name,
+                Bio = author.Bio
+            });
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor(int id)
@@ -98,3 +123,4 @@ namespace S2CA1DamianMagiera.Controllers
         }
     }
 }
+
