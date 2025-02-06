@@ -1,9 +1,10 @@
 ﻿namespace S2CA1DamianMagiera.Models
 {
-    public class Author
+   public class Author
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public string Bio { get; set; }
+ 
     }
 }
