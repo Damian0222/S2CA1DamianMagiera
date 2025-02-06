@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 namespace S2CA1DamianMagiera.Data
 {
-    public class BookstoreContext : DbContext
+    public class BookContext : DbContext
     {
-        public BookstoreContext(DbContextOptions<BookstoreContext> options) : base(options) { }
+        public BookContext(DbContextOptions<BookContext> options) : base(options) { }
         public DbSet<Author> Authors { get; set; }
          }
 }

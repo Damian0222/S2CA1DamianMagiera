@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using S2CA1DamianMagiera.Data;
 
 namespace S2CA1DamianMagiera
 {
@@ -6,7 +8,8 @@ namespace S2CA1DamianMagiera
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.Services.AddDbContext<BookContext>(options =>
+            options.UseInMemoryDatabase("BookstoreDB"));
             // Add services to the container.
 
             builder.Services.AddControllers();
