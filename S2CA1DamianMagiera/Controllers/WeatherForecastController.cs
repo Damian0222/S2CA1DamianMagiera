@@ -12,7 +12,7 @@ namespace S2CA1DamianMagiera.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
-
+        f
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
