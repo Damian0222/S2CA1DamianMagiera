@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using S2CA1DamianMagiera.Data;
+using S2CA1DamianMagiera.DTO;
 using S2CA1DamianMagiera.Models;
 
 namespace S2CA1DamianMagiera.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/books")]
     [ApiController]
     public class BooksController : ControllerBase
     {
@@ -21,36 +22,44 @@ namespace S2CA1DamianMagiera.Controllers
             _context = context;
         }
 
-        // GET: api/Books
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBook()
+        public async Task<ActionResult<IEnumerable<BookDTO>>> GetBooks()
         {
-            return await _context.Book.ToListAsync();
+            var books = await _context.Books.ToListAsync();
+            return books.Select(b => new BookDTO
+            {
+
+                Title = b.Title,
+
+                AuthorId = b.AuthorId
+            }).ToList();
         }
 
-        // GET: api/Books/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Book>> GetBook(int id)
+        public async Task<ActionResult<BookDTO>> GetBook(int id)
         {
-            var book = await _context.Book.FindAsync(id);
+            var book = await _context.Books.FindAsync(id);
 
             if (book == null)
             {
                 return NotFound();
             }
 
-            return book;
+            return new BookDTO { Title = book.Title, AuthorId = book.AuthorId };
         }
 
-        // PUT: api/Books/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBook(int id, Book book)
+        public async Task<IActionResult> UpdateBook(int id, BookDTO bookDTO)
         {
-            if (id != book.Id)
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+
+            book.Title = bookDTO.Title;
+
+            book.AuthorId = bookDTO.AuthorId;
 
             _context.Entry(book).State = EntityState.Modified;
 
@@ -73,28 +82,38 @@ namespace S2CA1DamianMagiera.Controllers
             return NoContent();
         }
 
-        // POST: api/Books
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Book>> PostBook(Book book)
+        public async Task<ActionResult<BookDTO>> CreateBook(BookDTO bookDTO)
         {
-            _context.Book.Add(book);
+            var book = new Book
+            {
+                Title = bookDTO.Title,
+
+                AuthorId = bookDTO.AuthorId
+            };
+
+            _context.Books.Add(book);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBook", new { id = book.Id }, book);
+            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, new BookDTO
+            {
+                Id = book.Id,
+                Title = book.Title,
+
+                AuthorId = book.AuthorId
+            });
         }
 
-        // DELETE: api/Books/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            var book = await _context.Book.FindAsync(id);
+            var book = await _context.Books.FindAsync(id);
             if (book == null)
             {
                 return NotFound();
             }
 
-            _context.Book.Remove(book);
+            _context.Books.Remove(book);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -102,7 +121,7 @@ namespace S2CA1DamianMagiera.Controllers
 
         private bool BookExists(int id)
         {
-            return _context.Book.Any(e => e.Id == id);
+            return _context.Books.Any(e => e.Id == id);
         }
     }
 }
