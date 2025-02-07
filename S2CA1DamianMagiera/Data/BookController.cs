@@ -7,5 +7,6 @@ namespace S2CA1DamianMagiera.Data
     {
         public BookContext(DbContextOptions<BookContext> options) : base(options) { }
         public DbSet<Author> Authors { get; set; }
+        public DbSet<S2CA1DamianMagiera.Models.Book> Book { get; set; } = default!;
          }
 }
