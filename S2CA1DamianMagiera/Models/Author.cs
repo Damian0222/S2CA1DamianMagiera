@@ -8,5 +8,6 @@
         public DateTime? DateOfBirth { get; set; }
         public string Nationality { get; set; }
         public string Bio { get; set; }
+        public List<Book> Books { get; set; } = new List<Book>();
     }
 }
