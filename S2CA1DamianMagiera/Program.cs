@@ -3,21 +3,22 @@ using S2CA1DamianMagiera.Data;
 
 namespace S2CA1DamianMagiera
 {
-    public class Program
+     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddDbContext<BookContext>(options =>
+            builder.Services.AddDbContext<Library>(options =>
             options.UseInMemoryDatabase("BookstoreDB"));
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
+
                     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
                     options.JsonSerializerOptions.WriteIndented = true; 
+            
                 });
-
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddCors(options =>
@@ -32,9 +33,10 @@ namespace S2CA1DamianMagiera
             });
 
             var app = builder.Build();
+
             using (var scope = app.Services.CreateScope())
             {
-                var context = scope.ServiceProvider.GetRequiredService<BookContext>();
+                var context = scope.ServiceProvider.GetRequiredService<Library>();
                 SeedData.Initialize(context);
             }
 

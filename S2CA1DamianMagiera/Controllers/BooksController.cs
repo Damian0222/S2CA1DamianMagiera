@@ -15,9 +15,9 @@ namespace S2CA1DamianMagiera.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly BookContext _context;
+        private readonly Library _context;
 
-        public BooksController(BookContext context)
+        public BooksController(Library context)
         {
             _context = context;
         }
@@ -28,13 +28,13 @@ namespace S2CA1DamianMagiera.Controllers
             var books = await _context.Books.ToListAsync();
             return books.Select(b => new BookDTO
             {
-
                 Title = b.Title,
-
+                YearPublished = b.YearPublished,
+                Genre = b.Genre,
+                PageCount = b.PageCount,
                 AuthorId = b.AuthorId
             }).ToList();
         }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<BookDTO>> GetBook(int id)
         {
@@ -45,9 +45,15 @@ namespace S2CA1DamianMagiera.Controllers
                 return NotFound();
             }
 
-            return new BookDTO { Title = book.Title, AuthorId = book.AuthorId };
+            return new BookDTO
+            {
+                Title = book.Title,
+                YearPublished = book.YearPublished,
+                Genre = book.Genre,
+                PageCount = book.PageCount,
+                AuthorId = book.AuthorId
+            };
         }
-
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, BookDTO bookDTO)
         {
@@ -58,7 +64,9 @@ namespace S2CA1DamianMagiera.Controllers
             }
 
             book.Title = bookDTO.Title;
-
+            book.YearPublished = bookDTO.YearPublished;
+            book.Genre = bookDTO.Genre;
+            book.PageCount = bookDTO.PageCount;
             book.AuthorId = bookDTO.AuthorId;
 
             _context.Entry(book).State = EntityState.Modified;
@@ -88,7 +96,9 @@ namespace S2CA1DamianMagiera.Controllers
             var book = new Book
             {
                 Title = bookDTO.Title,
-
+                YearPublished = bookDTO.YearPublished,
+                Genre = bookDTO.Genre,
+                PageCount = bookDTO.PageCount,
                 AuthorId = bookDTO.AuthorId
             };
 
@@ -97,9 +107,10 @@ namespace S2CA1DamianMagiera.Controllers
 
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, new BookDTO
             {
-                Id = book.Id,
                 Title = book.Title,
-
+                YearPublished = book.YearPublished,
+                Genre = book.Genre,
+                PageCount = book.PageCount,
                 AuthorId = book.AuthorId
             });
         }

@@ -16,9 +16,9 @@ namespace S2CA1DamianMagiera.Controllers
     [ApiController]
     public class AuthorsController : ControllerBase
     {
-        private readonly BookstoreContext _context;
+        private readonly Library _context;
 
-        public AuthorsController(BookstoreContext context)
+        public AuthorsController(Library context)
         {
             _context = context;
         }
