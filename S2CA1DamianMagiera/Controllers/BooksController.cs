@@ -25,7 +25,9 @@ namespace S2CA1DamianMagiera.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDTO>>> GetBooks()
         {
+            //Gets all books from the database
             var books = await _context.Books.ToListAsync();
+            // Convert Book entities to BookDTO objects
             return books.Select(b => new BookDTO
             {
                 Title = b.Title,
@@ -38,13 +40,15 @@ namespace S2CA1DamianMagiera.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<BookDTO>> GetBook(int id)
         {
+            // Find the book by ID
             var book = await _context.Books.FindAsync(id);
-
+            // If book does not exist
             if (book == null)
             {
+                // Return error
                 return NotFound();
             }
-
+            // Returns book details as a DTO
             return new BookDTO
             {
                 Title = book.Title,
@@ -57,9 +61,12 @@ namespace S2CA1DamianMagiera.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, BookDTO bookDTO)
         {
+            // Find the book by ID
             var book = await _context.Books.FindAsync(id);
+            // If book does not exist
             if (book == null)
             {
+                // Return error
                 return NotFound();
             }
 
@@ -73,16 +80,20 @@ namespace S2CA1DamianMagiera.Controllers
 
             try
             {
+                // Save changes to the database
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
+                // If book no longer exists
                 if (!BookExists(id))
                 {
+                    // Return error
                     return NotFound();
                 }
                 else
                 {
+                    // Throws exception if different issue occurres
                     throw;
                 }
             }
@@ -93,6 +104,7 @@ namespace S2CA1DamianMagiera.Controllers
         [HttpPost]
         public async Task<ActionResult<BookDTO>> CreateBook(BookDTO bookDTO)
         {
+            // Create a new book entity
             var book = new Book
             {
                 Title = bookDTO.Title,
@@ -101,10 +113,11 @@ namespace S2CA1DamianMagiera.Controllers
                 PageCount = bookDTO.PageCount,
                 AuthorId = bookDTO.AuthorId
             };
-
+            // Add book to the database
             _context.Books.Add(book);
+            // Saves changes
             await _context.SaveChangesAsync();
-
+            // Returns the created book
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, new BookDTO
             {
                 Title = book.Title,
@@ -118,13 +131,17 @@ namespace S2CA1DamianMagiera.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
+            //Find the book by ID
             var book = await _context.Books.FindAsync(id);
+            //If book does not exist
             if (book == null)
             {
+                //Error
                 return NotFound();
             }
-
+            // Removes book from the database
             _context.Books.Remove(book);
+            // Save 
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -132,6 +149,7 @@ namespace S2CA1DamianMagiera.Controllers
 
         private bool BookExists(int id)
         {
+            // Check if book with given ID exists
             return _context.Books.Any(e => e.Id == id);
         }
     }
