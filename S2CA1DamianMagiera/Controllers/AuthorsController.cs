@@ -12,17 +12,20 @@ using S2CA1DamianMagiera.Models;
 namespace S2CA1DamianMagiera.Controllers
 {
 
-    [Route("api/authors")]
+    [Route("api/authors")] //URL 
     [ApiController]
     public class AuthorsController : ControllerBase
     {
+        // Represents the database context
         private readonly Library _context;
 
+        // Constructor to inject the database context
         public AuthorsController(Library context)
         {
             _context = context;
         }
-        [HttpGet]
+
+        [HttpGet] //GET requests to get all authors
         public async Task<ActionResult<IEnumerable<AuthorDTO>>> GetAuthors()
         {
             return await _context.Authors
@@ -33,81 +36,125 @@ namespace S2CA1DamianMagiera.Controllers
                     Nationality = a.Nationality,
                     Bio = a.Bio
                 })
+                // Converts to a list and returns asynchronously
                 .ToListAsync();
         }
 
+        //GET requests to get a single author by ID
         [HttpGet("{id}")]
         public async Task<ActionResult<AuthorDTO>> GetAuthor(int id)
         {
+            // Searches for the author by ID
             var author = await _context.Authors.FindAsync(id);
-
+            // Checks if author exists
             if (author == null)
             {
-                return NotFound();
+                // Returns error
+                return NotFound(); 
             }
 
             return new AuthorDTO
             {
-                Name = author.Name,
-                DateOfBirth = author.DateOfBirth,
+                Name = author.Name, 
+                DateOfBirth = author.DateOfBirth, 
                 Nationality = author.Nationality,
-                Bio = author.Bio
+                Bio = author.Bio 
             };
         }
-
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAuthor(int id, AuthorDTO authorDTO)
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<object>>> SearchAuthors(string name = "")
         {
-            var author = await _context.Authors.FindAsync(id);
-
-            if (author == null)
+            var authors = await _context.Authors
+                //Makes sure books are included with authors
+                .Include(a => a.Books)
+                //Checks for authors whose names contain the search
+                .Where(a => a.Name.Contains(name))
+                .ToListAsync();
+            //If no matching authors found
+            if (!authors.Any())
             {
-                return NotFound();
+                 //Errors message
+                return NotFound("No authors found.");
             }
-
-            author.Name = authorDTO.Name;
-            author.DateOfBirth = authorDTO.DateOfBirth;
-            author.Nationality = authorDTO.Nationality;
-            author.Bio = authorDTO.Bio;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            // Creates the response
+            return authors.Select(a => new
+            {
+                a.Name,
+                a.DateOfBirth,
+                a.Nationality,
+                a.Bio,
+                //Formats the list of books
+                Books = a.Books.Select(b => new
+                {
+                    b.Title,
+                    b.YearPublished,
+                    b.Genre,
+                    b.PageCount
+                //converts books to list
+                }).ToList() 
+                //Converts authors to a list and returns repsonse
+            }).ToList();
         }
 
+        //PUT requests to update an existing author by ID
+        [HttpPut("{id}")] 
+        public async Task<IActionResult> UpdateAuthor(int id, AuthorDTO authorDTO)
+        {
+            // Finds the author by ID
+            var author = await _context.Authors.FindAsync(id);
+            // Checks if author exists
+            if (author == null)
+            {
+                // Returns 404 if not found
+                return NotFound(); 
+            }
 
-        [HttpPost]
+            author.Name = authorDTO.Name; // Updates Name
+            author.DateOfBirth = authorDTO.DateOfBirth;
+            author.Nationality = authorDTO.Nationality; 
+            author.Bio = authorDTO.Bio;
+        
+            // Saves changes to the database
+            await _context.SaveChangesAsync();
+            //Returns successful update
+            return NoContent(); 
+        }
+        // Handles POST requests to create a new author
+        [HttpPost] 
         public async Task<ActionResult<AuthorDTO>> CreateAuthor(AuthorDTO authorDTO)
         {
             var author = new Author
             {
-                Name = authorDTO.Name,
-                DateOfBirth = authorDTO.DateOfBirth,
-                Nationality = authorDTO.Nationality,
-                Bio = authorDTO.Bio
+                Name = authorDTO.Name, //Posts Name
+                DateOfBirth = authorDTO.DateOfBirth, //Posts DateOfBirth
+                Nationality = authorDTO.Nationality, //Posts Nationality
+                Bio = authorDTO.Bio //Posts Bio
             };
-
+            //Adds the new author to the database
             _context.Authors.Add(author);
+            //Saves changes
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, authorDTO);
+            // Returns 201 Created response with the new author data
+            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, authorDTO); 
         }
-
-
-        [HttpDelete("{id}")]
+        // Handles DELETE requests to remove an author by ID
+        [HttpDelete("{id}")] 
         public async Task<IActionResult> DeleteAuthor(int id)
         {
+            // Finds the author by ID
             var author = await _context.Authors.FindAsync(id);
-            if (author == null)
+            // Checks if author exists
+            if (author == null) 
             {
-                return NotFound();
+                // Returns 404 if not found
+                return NotFound(); 
             }
 
+            //Deletes the author from the database
             _context.Authors.Remove(author);
             await _context.SaveChangesAsync();
-
-            return NoContent();
+            // Returns successful deletion
+            return NoContent(); 
         }
     }
 }
