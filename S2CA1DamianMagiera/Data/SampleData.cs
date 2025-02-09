@@ -41,7 +41,7 @@ namespace S2CA1DamianMagiera.Data
                     new Book
                     {
                         Id = 1,
-                        Title = "Harry Potter and the Sorcerer's Stone",
+                        Title = "Harry Potter and the Philopherser stone",
                         YearPublished = 1997,
                         Genre = "Fantasy",
                         PageCount = 300,
