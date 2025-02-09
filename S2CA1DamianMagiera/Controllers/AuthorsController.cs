@@ -12,29 +12,28 @@ using S2CA1DamianMagiera.Models;
 namespace S2CA1DamianMagiera.Controllers
 {
 
-
-
     [Route("api/authors")]
     [ApiController]
     public class AuthorsController : ControllerBase
     {
-        private readonly BookContext _context;
+        private readonly BookstoreContext _context;
 
-        public AuthorsController(BookContext context)
+        public AuthorsController(BookstoreContext context)
         {
             _context = context;
         }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AuthorDTO>>> GetAuthors()
         {
-            var authors = await _context.Authors.ToListAsync();
-            return authors.Select(a => new AuthorDTO
-            {
-
-                Name = a.Name,
-                Bio = a.Bio
-            }).ToList();
+            return await _context.Authors
+                .Select(a => new AuthorDTO
+                {
+                    Name = a.Name,
+                    DateOfBirth = a.DateOfBirth,
+                    Nationality = a.Nationality,
+                    Bio = a.Bio
+                })
+                .ToListAsync();
         }
 
         [HttpGet("{id}")]
@@ -47,58 +46,52 @@ namespace S2CA1DamianMagiera.Controllers
                 return NotFound();
             }
 
-            return new AuthorDTO { Name = author.Name, Bio = author.Bio };
+            return new AuthorDTO
+            {
+                Name = author.Name,
+                DateOfBirth = author.DateOfBirth,
+                Nationality = author.Nationality,
+                Bio = author.Bio
+            };
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAuthor(int id, AuthorDTO authorDTO)
         {
             var author = await _context.Authors.FindAsync(id);
+
             if (author == null)
             {
                 return NotFound();
             }
 
             author.Name = authorDTO.Name;
+            author.DateOfBirth = authorDTO.DateOfBirth;
+            author.Nationality = authorDTO.Nationality;
+            author.Bio = authorDTO.Bio;
 
-            _context.Entry(author).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AuthorExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
+
         [HttpPost]
         public async Task<ActionResult<AuthorDTO>> CreateAuthor(AuthorDTO authorDTO)
         {
             var author = new Author
             {
                 Name = authorDTO.Name,
+                DateOfBirth = authorDTO.DateOfBirth,
+                Nationality = authorDTO.Nationality,
                 Bio = authorDTO.Bio
-
             };
 
             _context.Authors.Add(author);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, new AuthorDTO
-            {
 
-                Name = author.Name,
-                Bio = author.Bio
-            });
+            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, authorDTO);
         }
 
 
@@ -116,11 +109,5 @@ namespace S2CA1DamianMagiera.Controllers
 
             return NoContent();
         }
-
-        private bool AuthorExists(int id)
-        {
-            return _context.Authors.Any(e => e.Id == id);
-        }
     }
 }
-
